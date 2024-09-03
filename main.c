@@ -54,7 +54,7 @@ int main(){
     //next u amount of lines are updates. type 1 update changes the material cost taking in
     //from m to x m being name of material x being magic amount type 2 requires roles being r, a being different amount , and 
     // m being the material name 
-//hrldofdf
+    //hrldofdf
 
 
 
