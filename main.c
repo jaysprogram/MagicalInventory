@@ -32,6 +32,7 @@ int main(){
     // number of N roles at school
     int num_roles;
     scanf("%d",num_roles);
+    printf("%d",num_roles);
 
     //for n amount of roles collect the next lines containing 
     //first the i-th role and than the magical material name and amount seperated by spaces
