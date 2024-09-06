@@ -25,28 +25,34 @@ long long magic_required ;
 
 
 
-
 role roles[MAX_ROLES];
 int denizenRole[MAX_DENI];
-mag_mat_for_list * materialsList; // list of materials including its stats
-int num_materials = 0; // basically len for material list
+mag_mat_for_list * materialsList = NULL; // list of materials including its stats
+int num_materials = 0;
+int current_capacity = 10; 
+
 long long numRoles; // basically len of roles 
 //FIX MEEEE
 //need to make a material name array so input wont depend on order
+
 
 int checkMatIndex(char * name){
     for ( int i = 0; i < num_materials; i++){
         if(strcmp(materialsList[i].mat_name, name) == 0) // checks if material name is already in the array
         return i;
     }
-    
+
+    if(num_materials >= current_capacity){
+        current_capacity *= 2;
+        materialsList = realloc(materialsList, sizeof(mag_mat_for_list) * current_capacity);
+    }
     materialsList[num_materials].mat_name = strdup(name); // assigns new material name
     return num_materials++; // important 
 }
 
 
 void initRoles() {
-    materialsList = malloc(sizeof(mag_mat_for_list) * num_materials); //init material list
+    materialsList = malloc(sizeof(mag_mat_for_list) * current_capacity); //init material list
     scanf("%lld",&numRoles);
     for (int i = 0; i < numRoles; i++){
 
@@ -68,17 +74,15 @@ void initRoles() {
 
         }
     }
-    materialsList = realloc(materialsList,sizeof(mag_mat_for_list) * num_materials); //init material list
 }
 
 
 void getMagicMaterialValues(){
     for( int i = 0; i < num_materials; i++){
         char  material_name[MAX_STRING];
-        long long magic_needed; // scan for name and magic needed
+        long long magic_needed = 0; // scan for name and magic needed
         scanf("%s %lld", material_name, &magic_needed);
         materialsList[i].magic_required = magic_needed;
-        materialsList[i].mat_name = strdup(material_name);
         materialsList[i].total_amount_needed = 0;
 
     }
@@ -96,14 +100,14 @@ void fetchAndAssignRoles(){
     //assign each denizen a value 
     // access role to than access itemList to than add to number amount that have that role 
     for (int i = 0; i < num_deni; i++){
-        int role;
-        scanf("%d", &role); //adjust to 0 based indexing
-        role--;
+        int role_index;
+        scanf("%d", &role_index); //adjust to 0 based indexing
+        role_index--;
 
-        int matAmt = roles[role].materials_needed;
+        int matAmt = roles[role_index].materials_needed;
         for (int j = 0; j < matAmt; j++){
-            int index_of_material = roles[role].item_list[j].type;
-            int amnt_of_material_needed = roles[role].item_list[j].amount_needed;
+            int index_of_material = roles[role_index].item_list[j].type;
+            int amnt_of_material_needed = roles[role_index].item_list[j].amount_needed;
             materialsList[index_of_material].total_amount_needed += amnt_of_material_needed;
         }
     }
@@ -118,7 +122,7 @@ void printTotalMagic(){
         totalMagic += magic_needed * amtOfMaterial;
 
     }
-    printf("Totla Magic: %llu\n", totalMagic);
+    printf("Totla Magic: %lld\n", totalMagic);
 }
 
 void getUpdates(){
@@ -149,12 +153,27 @@ void getUpdates(){
             int rle;         //that role r requires at least 1 of item m before the update.
             long long newAmt;                        
             char name[MAX_STRING];
-            scanf("%d %s %llu",&rle,name,&newAmt);
+            scanf("%d %s %lld",&rle,name,&newAmt);
             rle--;
-            printf("%llu\n\n",roles[rle].item_list[checkMatIndex(name)].amount_needed);
-            roles[rle].item_list[checkMatIndex(name)].amount_needed = newAmt;
-            printf("%llu\n\n",roles[rle].item_list[checkMatIndex(name)].amount_needed);
 
+            for (int j = 0; j < roles[rle].materials_needed; j++){
+                int matIndex = roles[rle].item_list[j].type;
+
+                    long long oldAmt = roles[rle].item_list[j].amount_needed;            
+                     if (strcmp(materialsList[matIndex].mat_name, name) == 0){
+
+                    // Subtract the old amount from the total
+                    materialsList[matIndex].total_amount_needed -= oldAmt;
+
+                    // Update the amount for this role
+                     roles[rle].item_list[j].amount_needed = newAmt;
+
+                    // Add the new amount to the total
+                    materialsList[matIndex].total_amount_needed += newAmt;
+
+                    printf("Updated material %s for role %d from %lld to %lld\n", name, rle + 1, oldAmt, newAmt);
+                    }
+            }
         }
 
         walker++;
@@ -163,7 +182,6 @@ void getUpdates(){
 
 
 }
-
 
 
 
@@ -180,14 +198,18 @@ int main(){
     //printf("%s\n", materialsList[0].mat_name);
     //printf("%lld\n",roles[0].item_list[0].amount_needed);
 
-    for (int i = 0; i < num_materials; i++)
-        free(materialsList[i].mat_name);
+    for (int i = 0; i < num_materials; i++){
+        if(materialsList[i].mat_name != NULL){
+            free(materialsList[i].mat_name);
+            materialsList[i].mat_name = NULL;
+        }
+    }
 
-    for (int i = 0; i < MAX_ROLES; i++)
-        free(roles[i].item_list);  // Free item lists for each role
-
-
-
-
-
+    for (int i = 0; i < MAX_ROLES; i++){
+        if(roles[i].item_list != NULL){
+            free(roles[i].item_list);  // Free item lists for each role
+            roles[i].item_list = NULL;
+    
+        }
+    }
 }
