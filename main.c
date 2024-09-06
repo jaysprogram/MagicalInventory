@@ -30,6 +30,9 @@ role roles[MAX_ROLES];
 int denizenRole[MAX_DENI];
 mag_mat_for_list * materialsList; // list of materials including its stats
 int num_materials = 0; // basically len for material list
+long long numRoles; // basically len of roles 
+//FIX MEEEE
+//need to make a material name array so input wont depend on order
 
 int checkMatIndex(char * name){
     for ( int i = 0; i < num_materials; i++){
@@ -44,7 +47,6 @@ int checkMatIndex(char * name){
 
 void initRoles() {
     materialsList = malloc(sizeof(mag_mat_for_list) * num_materials); //init material list
-    long long numRoles;
     scanf("%lld",&numRoles);
     for (int i = 0; i < numRoles; i++){
 
@@ -62,10 +64,11 @@ void initRoles() {
             int matIndex = checkMatIndex(materialName);
 
             roles[i].item_list[j].type = matIndex; //store the material index
-            roles[i].item_list[j].amount_needed = amountOfMatNeeded; // stire the amount of the material needed
+            roles[i].item_list[j].amount_needed = amountOfMatNeeded; // store the amount of the material needed
 
         }
     }
+    materialsList = realloc(materialsList,sizeof(mag_mat_for_list) * num_materials); //init material list
 }
 
 
@@ -125,6 +128,8 @@ void getUpdates(){
     while (walker < numUpdates){
         int updateType;
         scanf("%d",&updateType);
+
+
         if (updateType == 1){ //type 1 update
             //1 m x - Change the magic requirement of magical material m to x
             char name[MAX_STRING];
@@ -133,17 +138,22 @@ void getUpdates(){
             for (int i = 0; i < num_materials; i++){
                 if(strcmp(materialsList[i].mat_name, name) == 0){
                     materialsList[i].magic_required = newAmt;
+                    break;
                 }
 
             }
 
         
         }
-        else{ //type 2 update 2 r m a - Role r now needs a amount of magical material m. You will be guaranteed
-            int rle, newAmt;                        //that role r requires at least 1 of item m before the update.
-            
-
-                                   
+        else{                //type 2 update 2 r m a - Role r now needs a amount of magical material m. You will be guaranteed
+            int rle;         //that role r requires at least 1 of item m before the update.
+            long long newAmt;                        
+            char name[MAX_STRING];
+            scanf("%d %s %llu",&rle,name,&newAmt);
+            rle--;
+            printf("%llu\n\n",roles[rle].item_list[checkMatIndex(name)].amount_needed);
+            roles[rle].item_list[checkMatIndex(name)].amount_needed = newAmt;
+            printf("%llu\n\n",roles[rle].item_list[checkMatIndex(name)].amount_needed);
 
         }
 
@@ -165,6 +175,7 @@ int main(){
     fetchAndAssignRoles();
     printf("amount of material needed from %s: %lld\n",materialsList[0].mat_name, materialsList[0].total_amount_needed);
     printTotalMagic();
+    getUpdates();
 
     //printf("%s\n", materialsList[0].mat_name);
     //printf("%lld\n",roles[0].item_list[0].amount_needed);
