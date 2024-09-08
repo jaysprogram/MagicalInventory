@@ -27,6 +27,8 @@ Sand 450 Stone 800 Clay 900 Obsidian 400 Shard 600 Pearl 800
 Moonstone 200 Sunstone 250 Feather 50 Mercury 600 Lead 300 Chalk 100
 Slate 400 Coral 500 Algae 600 Kelp 200 Water 800 Fire 900 Air 1000 Earth 1200
 Bloodstone 450 Onyx 300 Quartz 200 Topaz 150 Amber 400 Jade 350 Turquoise 450
+5
+2 5 4 3 2
 10
 1 Resin 400
 1 Silver 500
@@ -37,4 +39,4 @@ Bloodstone 450 Onyx 300 Quartz 200 Topaz 150 Amber 400 Jade 350 Turquoise 450
 3 Glass 1000
 3 Herb 1200
 1 Crystal 500
-2 Ruby 700
+2  Ruby 700

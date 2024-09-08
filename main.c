@@ -3,9 +3,6 @@
 #include <string.h>
 
 #define MAX_STRING 101
-#define MAX_ROLES 100000
-#define MAX_DENI 200000
-#define MAX_UNIQUE_MAT 100000
 
 typedef struct mag_mat_for_role {
 int type ; // index into the list of magical materials
@@ -24,13 +21,11 @@ long long magic_required ;
 }mag_mat_for_list;
 
 
-
-role roles[MAX_ROLES];
-int denizenRole[MAX_DENI];
+// Important variabeles
+role * roles = NULL;
 mag_mat_for_list * materialsList = NULL; // list of materials including its stats
 int num_materials = 0;
 int current_capacity = 10; 
-
 long long numRoles; // basically len of roles 
 //FIX MEEEE
 //need to make a material name array so input wont depend on order
@@ -45,6 +40,7 @@ int checkMatIndex(char * name){
     if(num_materials >= current_capacity){
         current_capacity *= 2;
         materialsList = realloc(materialsList, sizeof(mag_mat_for_list) * current_capacity);
+
     }
     materialsList[num_materials].mat_name = strdup(name); // assigns new material name
     return num_materials++; // important 
@@ -52,11 +48,13 @@ int checkMatIndex(char * name){
 
 
 void initRoles() {
+
     materialsList = malloc(sizeof(mag_mat_for_list) * current_capacity); //init material list
     scanf("%lld",&numRoles);
+   
+    roles = malloc(sizeof(role) * numRoles);
+    
     for (int i = 0; i < numRoles; i++){
-
-
         int differentMatNeeded;
         scanf(" %d", &differentMatNeeded);
         roles[i].materials_needed = differentMatNeeded; //amnt of different material needed
@@ -86,11 +84,6 @@ void getMagicMaterialValues(){
         materialsList[i].total_amount_needed = 0;
 
     }
-    //for debugging
-    for (int i = 0; i < num_materials; i++) {
-        printf("Material: %s, Magic Required: %lld\n", materialsList[i].mat_name, materialsList[i].magic_required);
-        
-        }
 }
 
 
@@ -103,8 +96,8 @@ void fetchAndAssignRoles(){
         int role_index;
         scanf("%d", &role_index); //adjust to 0 based indexing
         role_index--;
-
         int matAmt = roles[role_index].materials_needed;
+
         for (int j = 0; j < matAmt; j++){
             int index_of_material = roles[role_index].item_list[j].type;
             int amnt_of_material_needed = roles[role_index].item_list[j].amount_needed;
@@ -122,7 +115,7 @@ void printTotalMagic(){
         totalMagic += magic_needed * amtOfMaterial;
 
     }
-    printf("Totla Magic: %lld\n", totalMagic);
+    printf("%lld\n", totalMagic);
 }
 
 void getUpdates(){
@@ -139,6 +132,7 @@ void getUpdates(){
             char name[MAX_STRING];
             long long newAmt;
             scanf("%s %llu", name, &newAmt); // get values
+
             for (int i = 0; i < num_materials; i++){
                 if(strcmp(materialsList[i].mat_name, name) == 0){
                     materialsList[i].magic_required = newAmt;
@@ -171,7 +165,7 @@ void getUpdates(){
                     // Add the new amount to the total
                     materialsList[matIndex].total_amount_needed += newAmt;
 
-                    printf("Updated material %s for role %d from %lld to %lld\n", name, rle + 1, oldAmt, newAmt);
+                    
                     }
             }
         }
@@ -191,25 +185,27 @@ int main(){
     getMagicMaterialValues();
 
     fetchAndAssignRoles();
-    printf("amount of material needed from %s: %lld\n",materialsList[0].mat_name, materialsList[0].total_amount_needed);
-    printTotalMagic();
+    
     getUpdates();
 
     //printf("%s\n", materialsList[0].mat_name);
     //printf("%lld\n",roles[0].item_list[0].amount_needed);
 
     for (int i = 0; i < num_materials; i++){
-        if(materialsList[i].mat_name != NULL){
+        if(materialsList[i].mat_name != NULL){ // free material names
             free(materialsList[i].mat_name);
             materialsList[i].mat_name = NULL;
         }
     }
 
-    for (int i = 0; i < MAX_ROLES; i++){
+    for (int i = 0; i < numRoles; i++){
         if(roles[i].item_list != NULL){
             free(roles[i].item_list);  // Free item lists for each role
             roles[i].item_list = NULL;
     
         }
     }
+    free(roles); // free roles
+
+    return 0;
 }
